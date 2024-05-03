@@ -1,0 +1,259 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bree+Serif&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Bree Serif", serif;
+  letter-spacing: 1px;
+  scroll-behavior: smooth;
+}
+
+li:hover {
+  cursor: pointer;
+}
+
+.text-blue {
+  color: #62c1bf;
+}
+
+.fixed-blue {
+  color: white;
+  background-color: #62c1bf;
+}
+/* #272727
+#444444 */
+/* glassomorphic-effect */
+.glassomorphic-effect {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.blue-buttons {
+  color: #62c1bf;
+  border-color: #62c1bf;
+}
+
+.blue-buttons:hover {
+  color: black;
+  background-color: #62c1bf;
+}
+
+.login-container {
+  position: relative;
+  top: 17vh;
+  width: 30vw;
+}
+
+.signup-container {
+  position: relative;
+  top: 8vh;
+  width: 30vw;
+}
+
+.form-container {
+  width: 25vw;
+}
+
+.login-text {
+  color: #62c1bf;
+  width: 24rem;
+}
+
+.blue-text {
+  color: #62c1bf;
+}
+.background-video {
+  width: 99%;
+  height: 100vh;
+  object-fit: cover;
+  object-position: 10% center;
+}
+
+.brand-img {
+  width: 13vw;
+  height: 9vh;
+  object-fit: cover;
+  mix-blend-mode: hard-light;
+  filter: drop-shadow(5px 5px 10px rgba(0, 0, 0, 0.5));
+}
+
+.admin-profile-inputs {
+  width: 50vw;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.dashboard-title-img {
+  width: 15vw;
+  height: 40vh;
+  object-fit: cover;
+  position: absolute;
+  top: 4vw;
+  left: 3vw;
+  border: 5px solid white;
+}
+
+.posts_cards {
+  max-width: 100%;
+  height: 17rem;
+  object-fit: cover;
+}
+
+.dashboard-top-bin {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.dashboard-background-img {
+  width: 100%;
+  height: 12rem;
+  object-fit: cover;
+}
+
+.show-post-container {
+  width: 50vw;
+}
+
+.show-post-image {
+  width: 100%;
+  max-height: 50vh;
+  filter: blur(3px);
+  object-fit: cover;
+}
+
+.show-post-title {
+  top: 30vh;
+}
+.show-post-title-text {
+  font-size: 4rem;
+}
+
+.bordered-text {
+  -webkit-text-stroke: 0.1px whitesmoke;
+}
+
+.report-li {
+  width: 21vw;
+}
+
+.star-size {
+  width: 3vw;
+}
+
+.nivo-legend-item text {
+  fill: white !important;
+}
+
+.admin-team-img {
+  object-fit: cover;
+  height: 12vh;
+  width: 6vw;
+}
+
+.table {
+  --bs-table-bg: transparent;
+}
+
+.table th {
+  color: white;
+  background-color: #62c1bf;
+}
+
+.table td,
+tr {
+  color: #62c1bf;
+}
+
+.table th {
+  padding: 0.5rem 1rem;
+}
+
+/* Error Page */
+
+#notfound {
+  position: relative;
+  height: 100vh;
+}
+
+#notfound .notfound {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.notfound {
+  max-width: 920px;
+  width: 100%;
+  line-height: 1.4;
+  text-align: center;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.notfound .notfound-404 {
+  position: absolute;
+  height: 100px;
+  top: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+  z-index: -1;
+}
+
+.notfound .notfound-404 h1 {
+  font-family: "Maven Pro", sans-serif;
+  color: #ececec;
+  font-weight: 900;
+  font-size: 276px;
+  margin: 0px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.notfound h2 {
+  font-family: "Maven Pro", sans-serif;
+  font-size: 46px;
+  color: #000;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0px;
+}
+
+.notfound p {
+  font-size: 16px;
+  color: #000;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-top: 15px;
+}
+
+.notfound a {
+  font-size: 14px;
+  text-decoration: none;
+  text-transform: uppercase;
+  background: #189cf0;
+  display: inline-block;
+  padding: 16px 38px;
+  border: 2px solid transparent;
+  border-radius: 40px;
+  color: #fff;
+  font-weight: 400;
+  -webkit-transition: 0.2s all;
+  transition: 0.2s all;
+}
+
+.notfound a:hover {
+  background-color: #fff;
+  border-color: #189cf0;
+  color: #189cf0;
+}
