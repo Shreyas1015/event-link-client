@@ -7,22 +7,20 @@ import {
   LinearScale,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import axios from "axios";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 CharJs.register(LineElement, PointElement, CategoryScale, LinearScale);
 const LineGraph = () => {
   const [lineChartData, setLineChartData] = useState([]);
-  const storedToken = localStorage.getItem("token");
-
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/getLineChart`,
-          { headers }
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/getLineChart`,
+          { decryptedUID }
         );
         setLineChartData(response.data.lineChartData);
       } catch (error) {
@@ -31,7 +29,7 @@ const LineGraph = () => {
     };
 
     fetchData();
-  }, [storedToken]);
+  }, [decryptedUID]);
 
   const data = {
     labels: lineChartData.map((item) => item.category_name),

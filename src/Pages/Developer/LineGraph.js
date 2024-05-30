@@ -1,37 +1,23 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "firebase/compat/storage";
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
 import LineGraph from "../../Components/Developer/LineGraph";
+import secureLocalStorage from "react-secure-storage";
 
-const Linegraph = ({ token }) => {
+const Linegraph = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
-
-  console.log("UserId: ", uid);
+  const decryptedUID = secureLocalStorage.getItem("uid");
 
   const BackToLogin = () => {
     navigate("/");
   };
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>

@@ -3,8 +3,9 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -19,12 +20,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const storage = firebase.storage();
 
-const EditAdminData = ({ token }) => {
+const EditAdminData = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [errorMessage, setErrorMessage] = useState("");
-  const uid = new URLSearchParams(location.search).get("uid");
   const adminID = new URLSearchParams(location.search).get("admin_id");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
+  const [errorMessage, setErrorMessage] = useState("");
   const [adminData, setAdminData] = useState({
     admin_id: "",
     profile_img: "",
@@ -34,35 +36,26 @@ const EditAdminData = ({ token }) => {
     contact: "",
     uid: "",
   });
-  console.log("UserId: ", uid);
 
   const BackToLogin = () => {
     navigate("/");
   };
 
-  const storedToken = localStorage.getItem("token");
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/getIndividualAdminTeamData/${adminID}`,
-          { headers }
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/getIndividualAdminTeamData/${adminID}`,
+          { decryptedUID }
         );
-        console.log(adminID);
         setAdminData(response.data.adminData);
-        console.log("admin data", setAdminData);
       } catch (error) {
         console.error("Error fetching admin data:", error);
       }
     };
 
     fetchData();
-  }, [storedToken, adminID]);
+  }, [decryptedUID, adminID]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -83,25 +76,17 @@ const EditAdminData = ({ token }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       const imageFile = adminData.profile_img;
       const imageRef = storage
         .ref()
-        .child(`profile_images/${uid}_${imageFile.name}`);
+        .child(`profile_images/${decryptedUID}_${imageFile.name}`);
       await imageRef.put(imageFile, { contentType: "image/jpeg" });
       const imageUrl = await imageRef.getDownloadURL();
 
       const updatedAdminData = { ...adminData, profile_img: imageUrl };
-      console.log("Profile_img", adminData.profile_img);
-      await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/postIndividualAdminTeamData`,
-        updatedAdminData,
-        {
-          headers,
-        }
+      await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/admin/postIndividualAdminTeamData`,
+        { updatedAdminData, decryptedUID }
       );
 
       alert("Profile SetUp Completed");
@@ -114,24 +99,12 @@ const EditAdminData = ({ token }) => {
       }
     }
   };
-  
-  if (!uid) {
+
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>

@@ -28,165 +28,50 @@ import BarGraph from "./Pages/Developer/BarGraph";
 import ErrorPage from "./Pages/Authentications/ErrorPage";
 
 const App = () => {
-  const [token, setToken, handleSearch] = useState("");
-  const [userType, setUserType] = useState("");
-
-  const handleLogin = (newToken, newUserType) => {
-    setToken(newToken);
-    setUserType(newUserType);
-    window.localStorage.setItem("token", newToken);
-    window.localStorage.setItem("user_type", newUserType);
-  };
-
-  const handleLogout = () => {
-    setToken("");
-    setUserType("");
-    window.localStorage.removeItem("token");
-    window.localStorage.removeItem("user_type");
-  };
-
-  useEffect(() => {
-    const storedToken = window.localStorage.getItem("token");
-    const storedUserType = window.localStorage.getItem("user_type");
-    if (storedToken) {
-      setToken(storedToken);
-    }
-    if (storedUserType) {
-      setUserType(storedUserType);
-    }
-  }, [setToken, setUserType]);
-
   return (
     <>
       <Router>
         <Routes>
-          <Route
-            path="/"
-            element={<LoginPage handleLogin={handleLogin} token={token} />}
-          />
-          <Route
-            path="/signup"
-            element={<SignUpPage handleLogin={handleLogin} token={token} />}
-          />
-          {localStorage.getItem("user_type") == 1 ? (
-            <Route
-              path="/adminprofile"
-              element={
-                <AdminProfile handleLogout={handleLogout} token={token} />
-              }
-            />
-          ) : localStorage.getItem("user_type") == 2 ? (
-            <Route
-              path="/userprofile"
-              element={
-                <UserProfile handleLogout={handleLogout} token={token} />
-              }
-            />
-          ) : localStorage.getItem("user_type") == 3 ? (
-            <Route
-              path="/developerdashboard"
-              element={
-                <DeveloperDashboard handleLogout={handleLogout} token={token} />
-              }
-            />
-          ) : (
-            <Route path="/errorpage" element={<ErrorPage />} />
-          )}
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
 
-          <Route
-            path="/developeradminteam"
-            element={<AdminData handleLogout={handleLogout} token={token} />}
-          />
+          <Route path="/adminprofile" element={<AdminProfile />} />
 
-          <Route
-            path="/developeraddclient"
-            element={<AddClient handleLogout={handleLogout} token={token} />}
-          />
+          <Route path="/userprofile" element={<UserProfile />} />
 
-          <Route
-            path="/developerfeedbacks"
-            element={<AllFeedbacks handleLogout={handleLogout} token={token} />}
-          />
+          <Route path="/developerdashboard" element={<DeveloperDashboard />} />
+
+          <Route path="/errorpage" element={<ErrorPage />} />
+
+          <Route path="/developeradminteam" element={<AdminData />} />
+
+          <Route path="/developeraddclient" element={<AddClient />} />
+
+          <Route path="/developerfeedbacks" element={<AllFeedbacks />} />
 
           <Route
             path="/developerresolvedfeedbacks"
-            element={
-              <ResolvedFeedbacks handleLogout={handleLogout} token={token} />
-            }
+            element={<ResolvedFeedbacks />}
           />
 
-          <Route
-            path="/developerhandleclients"
-            element={
-              <HandleClients handleLogout={handleLogout} token={token} />
-            }
-          />
+          <Route path="/developerhandleclients" element={<HandleClients />} />
 
-          <Route
-            path="/developerlinegraph"
-            element={<Linegraph handleLogout={handleLogout} token={token} />}
-          />
-          <Route
-            path="/developerpiechart"
-            element={<PieChart handleLogout={handleLogout} token={token} />}
-          />
-          <Route
-            path="/developerbargraph"
-            element={<BarGraph handleLogout={handleLogout} token={token} />}
-          />
-          <Route
-            path="/developereditadmin"
-            element={
-              <EditAdminData handleLogout={handleLogout} token={token} />
-            }
-          />
+          <Route path="/developerlinegraph" element={<Linegraph />} />
+          <Route path="/developerpiechart" element={<PieChart />} />
+          <Route path="/developerbargraph" element={<BarGraph />} />
+          <Route path="/developereditadmin" element={<EditAdminData />} />
 
-          <Route
-            path="/developeruserteam"
-            element={<UsersData handleLogout={handleLogout} token={token} />}
-          />
+          <Route path="/developeruserteam" element={<UsersData />} />
 
-          <Route
-            path="/developeredituser"
-            element={<EditUserData handleLogout={handleLogout} token={token} />}
-          />
+          <Route path="/developeredituser" element={<EditUserData />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <Dashboard
-                handleLogout={handleLogout}
-                token={token}
-                onSearch={handleSearch}
-              />
-            }
-          />
-          <Route
-            path="/userdashboard"
-            element={
-              <UserDashboard handleLogout={handleLogout} token={token} />
-            }
-          />
-          <Route
-            path="/show_post"
-            element={<ShowPost handleLogout={handleLogout} token={token} />}
-          />
-          <Route
-            path="/addpost"
-            element={<AddPost handleLogout={handleLogout} token={token} />}
-          />
-          <Route
-            path="/edit_post"
-            element={<EditPost handleLogout={handleLogout} token={token} />}
-          />
-          <Route
-            path="/admin_feedback"
-            element={<Report handleLogout={handleLogout} token={token} />}
-          />
-          <Route
-            path="/user_feedback"
-            element={<UserReport handleLogout={handleLogout} token={token} />}
-          />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/userdashboard" element={<UserDashboard />} />
+          <Route path="/show_post" element={<ShowPost />} />
+          <Route path="/addpost" element={<AddPost />} />
+          <Route path="/edit_post" element={<EditPost />} />
+          <Route path="/admin_feedback" element={<Report />} />
+          <Route path="/user_feedback" element={<UserReport />} />
           <Route path="/forgetPass" element={<ForgetPass />} />
 
           <Route path="/resetPass" element={<ResetPass />} />

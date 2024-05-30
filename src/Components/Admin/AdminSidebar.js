@@ -1,18 +1,21 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const AdminSidebar = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
+
   const [adminID, setAdminID] = useState("");
 
   useEffect(() => {
     async function fetchAdminID() {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_admin_id?uid=${uid}`
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/c-admin/get_admin_id?uid=${decryptedUID}`,
+          { decryptedUID }
         );
         const fetchedAdminID = response.data.admin_id;
         setAdminID(fetchedAdminID);
@@ -21,19 +24,37 @@ const AdminSidebar = () => {
       }
     }
     fetchAdminID();
-  }, [uid]);
+  }, [decryptedUID]);
 
-  const handleLogout = () => {
-    window.localStorage.removeItem("token");
-    navigate("/");
-    alert("Logged Out Successfully");
+  const handleLogout = async () => {
+    try {
+      const response = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/logout`
+      );
+
+      if (response.status === 200) {
+        secureLocalStorage.removeItem("uid");
+        secureLocalStorage.removeItem("isLogin");
+        secureLocalStorage.removeItem("user_type");
+
+        navigate("/");
+        alert("Logged Out Successfully");
+      } else {
+        console.error("Logout failed:", response.error);
+      }
+    } catch (error) {
+      console.error("Error during logout:", error.message);
+    }
   };
 
   return (
     <>
       {/* My Profile */}
       <ul className="m-4 p-0" style={{ listStyle: "none" }}>
-        <Link className="text-decoration-none" to={`/adminprofile?uid=${uid}`}>
+        <Link
+          className="text-decoration-none"
+          to={`/adminprofile?uid=${encryptedUID}`}
+        >
           <li className="py-3 px-3 sidebar-li my-2 blue-buttons rounded-3">
             <i className="fa-solid fa-user fa-bounce me-2"></i> My Profile
           </li>
@@ -42,7 +63,7 @@ const AdminSidebar = () => {
         {adminID && (
           <Link
             className="text-decoration-none"
-            to={`/dashboard?uid=${uid}&admin_id=${adminID}`}
+            to={`/dashboard?uid=${encryptedUID}&admin_id=${adminID}`}
           >
             <li className="py-3 px-3 sidebar-li my-2 blue-buttons rounded-3">
               <i className="fa-brands fa-windows fa-bounce me-2"></i> Dashboard
@@ -53,7 +74,7 @@ const AdminSidebar = () => {
         {adminID && (
           <Link
             className="text-decoration-none"
-            to={`/addpost?uid=${uid}&admin_id=${adminID}`}
+            to={`/addpost?uid=${encryptedUID}&admin_id=${adminID}`}
           >
             <li className="py-3 px-3 sidebar-li my-2 blue-buttons rounded-3">
               <i className="fa-solid fa-file-export fa-bounce me-2"></i> Add
@@ -71,7 +92,7 @@ const AdminSidebar = () => {
         {adminID && (
           <Link
             className="text-decoration-none"
-            to={`/admin_feedback?uid=${uid}&admin_id=${adminID}`}
+            to={`/admin_feedback?uid=${encryptedUID}&admin_id=${adminID}`}
           >
             <li className="py-3 px-3 sidebar-li mx-4 my-2 blue-buttons rounded-3 fixed-bottom report-li">
               <i className="fa-solid fa-flag fa-bounce  ms-1 me-2"></i> Report /

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import { Link, useLocation } from "react-router-dom";
-import axios from "axios";
 import UserSidebar from "../../Components/Users/UserSidebar";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
-const ShowPost = ({ token }) => {
+const ShowPost = () => {
   const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
   const userProfileID = new URLSearchParams(location.search).get(
     "user_profile_id"
   );
@@ -27,13 +28,11 @@ const ShowPost = ({ token }) => {
   useEffect(() => {
     async function fetchPostData() {
       try {
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
+        const getPostUrl = `${process.env.REACT_APP_BASE_URL}/c-admin/show_post/${postID}`;
 
-        const getPostUrl = `${process.env.REACT_APP_BASE_URL}/show_post/${postID}`;
-
-        const postResponse = await axios.get(getPostUrl, { headers });
+        const postResponse = await axiosInstance.post(getPostUrl, {
+          decryptedUID,
+        });
 
         const postData = postResponse.data;
         setFormData({
@@ -54,7 +53,7 @@ const ShowPost = ({ token }) => {
     }
 
     fetchPostData();
-  }, [postID, token]);
+  }, [postID, decryptedUID]);
 
   return (
     <>
@@ -152,7 +151,7 @@ const ShowPost = ({ token }) => {
                   </h5>
                 </div>
                 <Link
-                  to={`/userdashboard?uid=${uid}&user_profile_id=${userProfileID}`}
+                  to={`/userdashboard?uid=${decryptedUID}&user_profile_id=${userProfileID}`}
                   className="mb-3 text-decoration-none"
                 >
                   <button className="btn btn-lg blue-buttons admin-profile-inputs">

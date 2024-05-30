@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const RecentFeedbacks = () => {
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const [recentFeedback, setRecentFeedback] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  console.log("UserId: ", uid);
-  const storedToken = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchRecentFeedbacks = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const res = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_recent_feedbacks`,
-          { headers }
+        const res = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/get_recent_feedbacks`,
+          { decryptedUID }
         );
         if (res.status === 200) {
           setRecentFeedback(res.data.feedbacks);
@@ -37,9 +32,10 @@ const RecentFeedbacks = () => {
 
     fetchRecentFeedbacks();
     console.log("Fetching All Data");
-  }, [storedToken]);
+  }, [decryptedUID]);
 
   if (loading) {
+
     return <div>Loading...</div>;
   }
   return (

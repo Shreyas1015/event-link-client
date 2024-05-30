@@ -2,17 +2,16 @@ import React, { useEffect, useState } from "react";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import AdminSidebar from "../../Components/Admin/AdminSidebar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import BackgroundVideoCopy from "../../Components/Common/BackgroundVideoCopy";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
-const Dashboard = ({ token }) => {
+const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const adminID = new URLSearchParams(location.search).get("admin_id");
-
-  console.log("Received Token:", token);
-
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
@@ -22,32 +21,21 @@ const Dashboard = ({ token }) => {
     email: "",
   });
 
-  const storedToken = localStorage.getItem("token");
-
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("Fetching dashboard data and posts...");
-
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-
-        const dashboardResponse = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_admin_data?uid=${uid}&admin_id=${adminID}`,
-          { headers }
+        const dashboardResponse = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/c-admin/get_admin_data?uid=${decryptedUID}&admin_id=${adminID}`,
+          { decryptedUID }
         );
-        console.log("Dashboard data response:", dashboardResponse.data);
-        console.log("Title Image URL:", dashboardData.profile_img);
         setDashboardData(dashboardResponse.data.adminData);
 
-        const postsResponse = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_posts?uid=${uid}&admin_id=${adminID}`,
-          { headers }
+        const postsResponse = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/c-admin/get_posts?uid=${decryptedUID}&admin_id=${adminID}`,
+          { decryptedUID }
         );
-        console.log("Posts response:", postsResponse.data);
-        setPosts(postsResponse.data);
 
+        setPosts(postsResponse.data);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -55,10 +43,10 @@ const Dashboard = ({ token }) => {
       }
     }
 
-    if (uid && adminID && storedToken) {
+    if (decryptedUID && adminID) {
       fetchData();
     }
-  }, [uid, adminID, storedToken, dashboardData.profile_img]);
+  }, [decryptedUID, adminID, dashboardData.profile_img]);
 
   const BackToLogin = () => {
     navigate("/");
@@ -66,15 +54,9 @@ const Dashboard = ({ token }) => {
 
   const handleDelete = async (postID) => {
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      await axios.delete(
-        `${process.env.REACT_APP_BASE_URL}/delete_post/${postID}`,
-        {
-          headers,
-        }
+      await axiosInstance.delete(
+        `${process.env.REACT_APP_BASE_URL}/c-admin/delete_post`,
+        { data: { decryptedUID, postID } }
       );
 
       setPosts((prevPosts) =>
@@ -85,24 +67,11 @@ const Dashboard = ({ token }) => {
     }
   };
 
-  if (!(uid && adminID)) {
+  if (!(decryptedUID && adminID)) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-
-  if (!storedToken) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>LOGIN TO ACCESS FURTHER</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
@@ -120,7 +89,7 @@ const Dashboard = ({ token }) => {
             className="col-lg-3 col-md-3 col-sm-3 col-3 sidebar"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
-            <AdminSidebar uid={uid} adminID={adminID} />
+            <AdminSidebar />
           </div>
           <div className="col-lg-9 col-md-9 col-sm-9 col-9">
             <div className="containers" style={{ width: "100%" }}>

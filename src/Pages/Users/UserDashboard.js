@@ -1,18 +1,19 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import UserSidebar from "../../Components/Users/UserSidebar";
 import BackgroundVideoCopy from "../../Components/Common/BackgroundVideoCopy";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
-const UserDashboard = ({ token }) => {
+const UserDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const userProfileID = new URLSearchParams(location.search).get(
     "user_profile_id"
   );
-  console.log("Received Token:", token);
 
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,30 +26,20 @@ const UserDashboard = ({ token }) => {
     email: "",
   });
 
-  const storedToken = localStorage.getItem("token");
-
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("Fetching dashboard data and posts...");
-
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-
-        const dashboardResponse = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_user_data?uid=${uid}&user_profile_id=${userProfileID}`,
-          { headers }
+        const dashboardResponse = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/user/get_user_data?uid=${decryptedUID}&user_profile_id=${userProfileID}`,
+          { decryptedUID }
         );
-        console.log("Dashboard data response:", dashboardResponse.data);
-        console.log("Title Image URL:", dashboardData.profile_img);
         setDashboardData(dashboardResponse.data.userData);
 
-        const postsResponse = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_all_posts`,
-          { headers }
+        const postsResponse = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/user/get_all_posts`,
+          { decryptedUID }
         );
-        console.log("Posts response:", postsResponse.data);
+
         setPosts(postsResponse.data);
 
         setIsLoading(false);
@@ -58,16 +49,16 @@ const UserDashboard = ({ token }) => {
       }
     }
 
-    if (uid && userProfileID && storedToken) {
+    if (decryptedUID && userProfileID) {
       fetchData();
     }
-  }, [uid, userProfileID, storedToken, dashboardData.profile_img]);
+  }, [decryptedUID, userProfileID, dashboardData.profile_img]);
 
   const BackToLogin = () => {
     navigate("/");
   };
 
-  if (!(uid && userProfileID)) {
+  if (!(decryptedUID && userProfileID)) {
     return (
       <>
         <div className="container text-center fw-bold">
@@ -80,18 +71,6 @@ const UserDashboard = ({ token }) => {
     );
   }
 
-  if (!storedToken) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>LOGIN TO ACCESS FURTHER</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
   return (
     <>
       <DasboardNavbar />
@@ -101,7 +80,7 @@ const UserDashboard = ({ token }) => {
             className="col-lg-3 col-md-3 col-sm-3 col-3 m-0 p-0"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
-            <UserSidebar uid={uid} adminID={userProfileID} />
+            <UserSidebar />
           </div>
           {/* <div className="col-lg-3 col-md-3 col-sm-3 col-3 m-0 p-0"></div> */}
           <div className="col-lg-9 col-md-9 col-sm-9 col-9">
@@ -246,7 +225,7 @@ const UserDashboard = ({ token }) => {
                               )}
                             </p>
                             <Link
-                              to={`/show_post?post_id=${post.posts_id}&uid=${uid}&user_profile_id=${userProfileID}`}
+                              to={`/show_post?post_id=${post.posts_id}&uid=${encryptedUID}&user_profile_id=${userProfileID}`}
                               className="post-link text-decoration-none"
                             >
                               <button className="btn blue-buttons me-4">

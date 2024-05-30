@@ -1,12 +1,30 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const TitleAndLogout = (props) => {
   const navigate = useNavigate();
-  const handleLogout = () => {
-    window.localStorage.removeItem("token");
-    navigate("/");
-    alert("Logged Out Successfully");
+  
+  const handleLogout = async () => {
+    try {
+      const response = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/logout`
+      );
+
+      if (response.status === 200) {
+        secureLocalStorage.removeItem("uid");
+        secureLocalStorage.removeItem("isLogin");
+        secureLocalStorage.removeItem("user_type");
+
+        navigate("/");
+        alert("Logged Out Successfully");
+      } else {
+        console.error("Logout failed:", response.error);
+      }
+    } catch (error) {
+      console.error("Error during logout:", error.message);
+    }
   };
 
   return (

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import BackgroundVideo from "../../Components/Common/BackgroundVideo";
+import axiosInstance from "../../API/axiosInstance";
 
-const SignUpPage = ({ handleLogin, token }) => {
+const SignUpPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -38,14 +38,17 @@ const SignUpPage = ({ handleLogin, token }) => {
     }
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/signup`, {
-        email: formData.email,
-        password: formData.password,
-      });
-      handleLogin(res.data.token);
-
-      navigate(`/`);
-      alert("Signed Up Successfully");
+      const res = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/signup`,
+        {
+          email: formData.email,
+          password: formData.password,
+        }
+      );
+      if (res.status === 200) {
+        alert("Signed Up Successfully");
+        navigate(`/`);
+      }
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {

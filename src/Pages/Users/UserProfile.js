@@ -1,10 +1,11 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import UserSidebar from "../../Components/Users/UserSidebar";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -19,17 +20,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const storage = firebase.storage();
 
-const UserProfile = ({ token }) => {
+const UserProfile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
-  console.log("UserId: ", uid);
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("uid");
 
   const [errorMessage, setErrorMessage] = useState("");
+
   const [userProfileID, setUserProfileID] = useState("");
   const [formData, setFormData] = useState({
     profile_img: "",
-    uid: uid,
+    uid: decryptedUID,
     name: "",
     college_name: "",
     email: "",
@@ -40,39 +41,34 @@ const UserProfile = ({ token }) => {
   useEffect(() => {
     async function fetchUserProfileID() {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_user_profile_id?uid=${uid}`
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/user/get_user_profile_id?uid=${decryptedUID}`,
+          { decryptedUID }
         );
         const fetchedUserProfileID = response.data.user_profile_id;
-        console.log("Fetched User Profile ID:", fetchedUserProfileID);
+
         setUserProfileID(fetchedUserProfileID);
-        console.log("Response from API:", response.data);
       } catch (error) {
         console.error("Error fetching user_profile_id:", error);
       }
     }
     fetchUserProfileID();
-  }, [uid]);
-
-  const storedToken = localStorage.getItem("token");
+  }, [decryptedUID]);
 
   useEffect(() => {
     async function fetchUserProfileData() {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
         if (userProfileID) {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_URL}/get_user_profile_data?user_profile_id=${userProfileID}`,
-            { headers }
+          const response = await axiosInstance.post(
+            `${process.env.REACT_APP_BASE_URL}/user/get_user_profile_data?user_profile_id=${userProfileID}`,
+            { decryptedUID }
           );
 
           const profileData = response.data;
 
           setFormData({
             profile_img: profileData.profile_img,
-            uid: uid,
+            uid: decryptedUID,
             name: profileData.name,
             college_name: profileData.college_name,
             email: profileData.email,
@@ -86,7 +82,7 @@ const UserProfile = ({ token }) => {
     }
 
     fetchUserProfileData();
-  }, [storedToken, userProfileID, uid]);
+  }, [userProfileID, decryptedUID]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -111,34 +107,31 @@ const UserProfile = ({ token }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       const imageFile = formData.profile_img;
       const imageRef = storage
         .ref()
-        .child(`profile_images/${uid}_${imageFile.name}`);
+        .child(`profile_images/${decryptedUID}_${imageFile.name}`);
       await imageRef.put(imageFile, { contentType: "image/jpeg" });
       const imageUrl = await imageRef.getDownloadURL();
 
       const updatedFormData = { ...formData, profile_img: imageUrl };
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/user_profile_setup`,
-        updatedFormData,
-        { headers }
+      const response = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/user/user_profile_setup`,
+        { updatedFormData, decryptedUID }
       );
 
       alert("Profile SetUp Completed");
       const newuserProfileID = response.data.user_profile_id;
 
       if (userProfileID) {
-        navigate(`/userdashboard?uid=${uid}&user_profile_id=${userProfileID}`);
+        navigate(
+          `/userdashboard?uid=${encryptedUID}&user_profile_id=${userProfileID}`
+        );
       } else {
         setUserProfileID(newuserProfileID);
         navigate(
-          `/userdashboard?uid=${uid}&user_profile_id=${newuserProfileID}`
+          `/userdashboard?uid=${encryptedUID}&user_profile_id=${newuserProfileID}`
         );
       }
 
@@ -160,23 +153,11 @@ const UserProfile = ({ token }) => {
     }
   };
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>

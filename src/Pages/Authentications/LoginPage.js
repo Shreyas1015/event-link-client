@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import BackgroundVideo from "../../Components/Common/BackgroundVideo";
+import axiosInstance from "../../API/axiosInstance";
+import secureLocalStorage from "react-secure-storage";
 
-const LoginPage = ({ handleLogin, token }) => {
+const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -27,25 +28,25 @@ const LoginPage = ({ handleLogin, token }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/login`, {
-        email: formData.email,
-        password: formData.password,
-      });
-      handleLogin(res.data.token);
-      const userId = res.data.uid;
-      console.log("userId:", userId);
-      const userType = res.data.user_type;
-      localStorage.setItem("user_type", userType);
+      const loginRes = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/auth/login`,
+        formData
+      );
+      const userId = loginRes.data.uid;
+      const userType = loginRes.data.user_type;
 
-      // eslint-disable-next-line eqeqeq
-      if (userType == 1) {
-        navigate(`/adminprofile?uid=${userId}`);
-        // eslint-disable-next-line eqeqeq
-      } else if (userType == 2) {
-        navigate(`/userprofile?uid=${userId}`);
-        // eslint-disable-next-line eqeqeq
-      } else if (userType == 3) {
-        navigate(`/developerdashboard?uid=${userId}`);
+      secureLocalStorage.setItem("uid", userId);
+      secureLocalStorage.setItem("user_type", userType);
+
+      const encryptedUID = localStorage.getItem("@secure.n.uid");
+      const decryptedUserType = secureLocalStorage.getItem("user_type");
+
+      if (decryptedUserType == 1) {
+        navigate(`/adminprofile?uid=${encryptedUID}`);
+      } else if (decryptedUserType == 2) {
+        navigate(`/userprofile?uid=${encryptedUID}`);
+      } else if (decryptedUserType == 3) {
+        navigate(`/developerdashboard?uid=${encryptedUID}`);
       }
       alert("Logged In Successfully");
     } catch (error) {
@@ -57,27 +58,6 @@ const LoginPage = ({ handleLogin, token }) => {
       }
     }
   };
-
-  if (token) {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      navigate(`/adminprofile?uid=${userId}`);
-    }
-  }
-
-  if (token) {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      navigate(`/userprofile?uid=${userId}`);
-    }
-  }
-
-  if (token) {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      navigate(`/developerdashboard?uid=${userId}`);
-    }
-  }
 
   return (
     <>

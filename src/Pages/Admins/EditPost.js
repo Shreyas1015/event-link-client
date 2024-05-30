@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import AdminSidebar from "../../Components/Admin/AdminSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -19,11 +20,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const storage = firebase.storage();
-const EditPost = ({ token }) => {
+const EditPost = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
   const adminID = new URLSearchParams(location.search).get("admin_id");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const postID = new URLSearchParams(location.search).get("post_id");
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -38,9 +40,40 @@ const EditPost = ({ token }) => {
     email: "",
     google_form_link: "",
     venue: "",
-    uid: uid,
+    uid: decryptedUID,
     admin_id: adminID,
   });
+
+  useEffect(() => {
+    async function fetchPostData() {
+      try {
+        const getPostUrl = `${process.env.REACT_APP_BASE_URL}/c-admin/get_edit_post_data/${postID}`;
+        const postResponse = await axiosInstance.post(getPostUrl, {
+          decryptedUID,
+        });
+
+        const postData = postResponse.data;
+        setFormData({
+          posts_id: postData.posts_id,
+          cover_img: postData.cover_img,
+          event_date: postData.event_date,
+          event_name: postData.event_name,
+          event_desc: postData.event_desc,
+          category_id: postData.category_id,
+          contact: postData.contact,
+          email: postData.email,
+          google_form_link: postData.google_form_link,
+          venue: postData.venue,
+          uid: decryptedUID,
+          admin_id: adminID,
+        });
+      } catch (error) {
+        console.error("Error fetching post data:", error);
+      }
+    }
+
+    fetchPostData();
+  }, [postID, decryptedUID, adminID]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -62,28 +95,23 @@ const EditPost = ({ token }) => {
     e.preventDefault();
 
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       const imageFile = formData.cover_img;
       const imageRef = storage
         .ref()
-        .child(`All_Posts_Images/${uid}_${imageFile.name}`);
+        .child(`All_Posts_Images/${decryptedUID}_${imageFile.name}`);
       await imageRef.put(imageFile, { contentType: "image/jpeg" });
       const imageUrl = await imageRef.getDownloadURL();
 
       const updatedFormData = { ...formData, cover_img: imageUrl };
-      await axios.put(
-        `${process.env.REACT_APP_BASE_URL}/edit_post/${postID}`,
-        updatedFormData,
-        {
-          headers,
-        }
-      );
 
-      alert("Post Updated Successfully");
-      navigate(`/dashboard?uid=${uid}&admin_id=${adminID}`);
+      const res = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/c-admin/edit_post`,
+        { updatedFormData, decryptedUID, postID }
+      );
+      if (res.status === 200) {
+        alert("Post Updated Successfully");
+        navigate(`/dashboard?uid=${encryptedUID}&admin_id=${adminID}`);
+      }
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
@@ -93,40 +121,6 @@ const EditPost = ({ token }) => {
       }
     }
   };
-
-  useEffect(() => {
-    async function fetchPostData() {
-      try {
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
-
-        const getPostUrl = `${process.env.REACT_APP_BASE_URL}/edit_post/${postID}`;
-
-        const postResponse = await axios.get(getPostUrl, { headers });
-
-        const postData = postResponse.data;
-        setFormData({
-          posts_id: postData.posts_id,
-          cover_img: postData.cover_img,
-          event_date: postData.event_date,
-          event_name: postData.event_name,
-          event_desc: postData.event_desc,
-          category_id: postData.category_id,
-          contact: postData.contact,
-          email: postData.email,
-          google_form_link: postData.google_form_link,
-          venue: postData.venue,
-          uid: uid,
-          admin_id: adminID,
-        });
-      } catch (error) {
-        console.error("Error fetching post data:", error);
-      }
-    }
-
-    fetchPostData();
-  }, [postID, token, uid, adminID]);
 
   return (
     <>

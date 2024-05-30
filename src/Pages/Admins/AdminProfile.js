@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import AdminSidebar from "../../Components/Admin/AdminSidebar";
-import axios from "axios";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -21,41 +21,37 @@ firebase.initializeApp(firebaseConfig);
 
 const storage = firebase.storage();
 
-const AdminProfile = ({ token }) => {
+const AdminProfile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
-  console.log("UserId: ", uid);
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
 
   const [errorMessage, setErrorMessage] = useState("");
   const [adminID, setAdminID] = useState("");
   const [formData, setFormData] = useState({
     profile_img: "",
-    uid: uid,
+    uid: decryptedUID,
     college_name: "",
     email: "",
     contact: "",
     address: "",
   });
 
-  const storedToken = localStorage.getItem("token");
-
   useEffect(() => {
     async function fetchAdminID() {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_admin_id?uid=${uid}`
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/c-admin/get_admin_id`,
+          { decryptedUID }
         );
         const fetchedAdminID = response.data.admin_id;
-        console.log("Fetched admin ID:", fetchedAdminID);
         setAdminID(fetchedAdminID);
-        console.log("Response from API:", response.data);
       } catch (error) {
         console.error("Error fetching admin_id:", error);
       }
     }
     fetchAdminID();
-  }, [uid]);
+  }, [decryptedUID]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -76,20 +72,17 @@ const AdminProfile = ({ token }) => {
   useEffect(() => {
     async function fetchAdminProfileData() {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
         if (adminID) {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_URL}/get_admin_profile_data?admin_id=${adminID}`,
-            { headers }
+          const response = await axiosInstance.post(
+            `${process.env.REACT_APP_BASE_URL}/c-admin/get_admin_profile_data`,
+            { decryptedUID, adminID }
           );
 
           const profileData = response.data;
 
           setFormData({
             profile_img: profileData.profile_img,
-            uid: uid,
+            uid: decryptedUID,
             college_name: profileData.college_name,
             email: profileData.email,
             contact: profileData.contact,
@@ -102,7 +95,7 @@ const AdminProfile = ({ token }) => {
     }
 
     fetchAdminProfileData();
-  }, [storedToken, adminID, uid]);
+  }, [adminID, decryptedUID]);
 
   const BackToLogin = () => {
     navigate("/");
@@ -111,33 +104,32 @@ const AdminProfile = ({ token }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       const imageFile = formData.profile_img;
+      if (!imageFile) {
+        alert("No image file selected.");
+        return;
+      }
       const imageRef = storage
         .ref()
-        .child(`profile_images/${uid}_${imageFile.name}`);
+        .child(`profile_images/${decryptedUID}_${imageFile.name}`);
       await imageRef.put(imageFile, { contentType: "image/jpeg" });
       const imageUrl = await imageRef.getDownloadURL();
 
       const updatedFormData = { ...formData, profile_img: imageUrl };
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/profile_setup`,
-        updatedFormData,
-        { headers }
+      const response = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/c-admin/profile_setup`,
+        { updatedFormData, decryptedUID }
       );
 
       alert("Profile SetUp Completed");
       const newAdminID = response.data.admin_id;
 
       if (adminID) {
-        navigate(`/addpost?uid=${uid}&admin_id=${adminID}`);
+        navigate(`/addpost?uid=${encryptedUID}&admin_id=${adminID}`);
       } else {
         setAdminID(newAdminID);
-        navigate(`/addpost?uid=${uid}&admin_id=${newAdminID}`);
+        navigate(`/addpost?uid=${encryptedUID}&admin_id=${newAdminID}`);
       }
 
       setFormData({
@@ -157,24 +149,11 @@ const AdminProfile = ({ token }) => {
     }
   };
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>

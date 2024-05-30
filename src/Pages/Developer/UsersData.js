@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
-import axios from "axios";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
 import * as XLSX from "xlsx";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -19,28 +20,21 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 // const storage = firebase.storage();
-const UsersData = ({ token }) => {
+const UsersData = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const [userData, setUserData] = useState([]);
-  console.log("UserId: ", uid);
 
   const BackToLogin = () => {
     navigate("/");
   };
 
-  const storedToken = localStorage.getItem("token");
-
   const handleDownload = async (format) => {
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/getUserTeamData`,
-        { headers }
+      const response = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/admin/getUserTeamData`,
+        { decryptedUID }
       );
 
       if (format === "csv") {
@@ -65,12 +59,9 @@ const UsersData = ({ token }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/getUserTeamData`,
-          { headers }
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/getUserTeamData`,
+          { decryptedUID }
         );
         setUserData(response.data.userData);
       } catch (error) {
@@ -79,19 +70,13 @@ const UsersData = ({ token }) => {
     };
 
     fetchData();
-  }, [storedToken]);
+  }, [decryptedUID]);
 
   const handleDelete = async (userProfileID, uid) => {
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      await axios.delete(
-        `${process.env.REACT_APP_BASE_URL}/delete_user/${userProfileID}/${uid}`,
-        {
-          headers,
-        }
+      await axiosInstance.delete(
+        `${process.env.REACT_APP_BASE_URL}/admin/delete_user/${userProfileID}/${uid}`,
+        { data: { decryptedUID } }
       );
 
       setUserData((prevUsers) =>
@@ -102,23 +87,11 @@ const UsersData = ({ token }) => {
     }
   };
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
@@ -209,7 +182,7 @@ const UsersData = ({ token }) => {
                       <td>{user.clg_address}</td>
                       <td>
                         <Link
-                          to={`/developeredituser?user_profile_id=${user.user_profile_id}&uid=${uid}`}
+                          to={`/developeredituser?user_profile_id=${user.user_profile_id}&uid=${encryptedUID}`}
                           className="post-link text-decoration-none"
                         >
                           <button className="btn blue-buttons mt-2">

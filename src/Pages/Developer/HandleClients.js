@@ -1,28 +1,25 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "firebase/compat/storage";
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
 import * as XLSX from "xlsx";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
-const HandleClients = ({ token }) => {
+const HandleClients = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const [clientData, setClientData] = useState([]);
   const [editingClient, setEditingClient] = useState({
     uid: null,
     user_type: null,
   });
 
-  console.log("UserId: ", uid);
-
   const BackToLogin = () => {
     navigate("/");
   };
-
-  const storedToken = localStorage.getItem("token");
 
   const handleEditClick = (client) => {
     setEditingClient({ uid: client.uid, user_type: client.user_type });
@@ -30,14 +27,9 @@ const HandleClients = ({ token }) => {
 
   const handleSaveClick = async () => {
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      await axios.put(
-        `${process.env.REACT_APP_BASE_URL}/update_user_type/${editingClient.uid}`,
-        { user_type: editingClient.user_type },
-        { headers }
+      await axiosInstance.put(
+        `${process.env.REACT_APP_BASE_URL}/admin/update_user_type/${editingClient.uid}`,
+        { user_type: editingClient.user_type, decryptedUID }
       );
 
       setClientData((prevClients) =>
@@ -57,12 +49,9 @@ const HandleClients = ({ token }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/getAllClientData`,
-          { headers }
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/getAllClientData`,
+          { decryptedUID }
         );
         setClientData(response.data.clientData);
       } catch (error) {
@@ -71,17 +60,13 @@ const HandleClients = ({ token }) => {
     };
 
     fetchData();
-  }, [storedToken]);
+  }, [decryptedUID]);
 
   const handleDownload = async (format) => {
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/getAllClientData`,
-        { headers }
+      const response = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/admin/getAllClientData`,
+        { decryptedUID }
       );
 
       if (format === "csv") {
@@ -105,15 +90,9 @@ const HandleClients = ({ token }) => {
 
   const handleDelete = async (uid) => {
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      await axios.delete(
-        `${process.env.REACT_APP_BASE_URL}/delete_client/${uid}`,
-        {
-          headers,
-        }
+      await axiosInstance.delete(
+        `${process.env.REACT_APP_BASE_URL}/admin/delete_client/${uid}`,
+        { data: { decryptedUID } }
       );
 
       setClientData((prevClients) =>
@@ -124,23 +103,11 @@ const HandleClients = ({ token }) => {
     }
   };
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
@@ -186,7 +153,7 @@ const HandleClients = ({ token }) => {
             </button>
             <div className="text-end">
               <Link
-                to={`/developeraddclient?uid=${uid}`}
+                to={`/developeraddclient?uid=${encryptedUID}`}
                 className="text-decoration-none"
               >
                 <button className="btn blue-buttons btn-lg mx-3">

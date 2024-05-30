@@ -1,35 +1,30 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import DeveloperCountBox from "../../Components/Developer/DeveloperCountBox";
 import RecentFeedbacks from "../../Components/Developer/RecentFeedbacks";
 import GraphCard from "../../Components/Developer/GraphCard";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
 import PieChart from "../../Components/Developer/PieChart";
 import LineGraph from "../../Components/Developer/LineGraph";
+import axiosInstance from "../../API/axiosInstance";
+import secureLocalStorage from "react-secure-storage";
 
-const DeveloperDashboard = ({ token }) => {
+const DeveloperDashboard = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
-  console.log("UserId: ", uid);
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const [adminCount, setAdminCount] = useState(0);
   const [usersCount, setUsersCount] = useState(0);
   const [postsCount, setPostsCount] = useState(0);
   const [feedbackCount, setFeedbackCount] = useState(0);
 
-  const storedToken = localStorage.getItem("token");
-
   useEffect(() => {
     const fetchNoOfAdmins = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const res = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_no_of_admins`,
-          { headers }
+        const res = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/get_no_of_admins`,
+          { decryptedUID }
         );
         if (res.status === 200) {
           setAdminCount(res.data.adminCount);
@@ -45,12 +40,9 @@ const DeveloperDashboard = ({ token }) => {
 
     const fetchNoOfPosts = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const res = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_no_of_posts`,
-          { headers }
+        const res = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/get_no_of_posts`,
+          { decryptedUID }
         );
         if (res.status === 200) {
           setPostsCount(res.data.postsCount);
@@ -66,12 +58,9 @@ const DeveloperDashboard = ({ token }) => {
 
     const fetchNoOfFeedback = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const res = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_no_of_feedbacks`,
-          { headers }
+        const res = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/get_no_of_feedbacks`,
+          { decryptedUID }
         );
         if (res.status === 200) {
           setFeedbackCount(res.data.feedbackCount);
@@ -86,14 +75,10 @@ const DeveloperDashboard = ({ token }) => {
     };
 
     const fetchNoOfUsers = async () => {
-      console.log("fetching users");
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const res = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_no_of_users`,
-          { headers }
+        const res = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/get_no_of_users`,
+          { decryptedUID }
         );
         if (res.status === 200) {
           setUsersCount(res.data.usersCount);
@@ -111,9 +96,8 @@ const DeveloperDashboard = ({ token }) => {
     fetchNoOfUsers();
     fetchNoOfPosts();
     fetchNoOfFeedback();
-    console.log("Fetching All Data Count");
   }, [
-    storedToken,
+    decryptedUID,
     setAdminCount,
     setUsersCount,
     setPostsCount,
@@ -124,23 +108,11 @@ const DeveloperDashboard = ({ token }) => {
     navigate("/");
   };
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>

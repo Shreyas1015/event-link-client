@@ -1,15 +1,16 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-// import firebase from "firebase/compat/app";
+import { Link, useNavigate } from "react-router-dom";
 import "firebase/compat/storage";
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
 import { useState } from "react";
-import axios from "axios";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
-const AddClient = ({ token }) => {
+const AddClient = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -19,8 +20,6 @@ const AddClient = ({ token }) => {
     password: "",
     confirmPassword: "",
   });
-
-  console.log("UserId: ", uid);
 
   const BackToLogin = () => {
     navigate("/");
@@ -50,15 +49,9 @@ const AddClient = ({ token }) => {
     }
 
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-      await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/add_client`,
-        formData,
-        {
-          headers,
-        }
+      await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/admin/add_client`,
+        { formData, decryptedUID }
       );
       alert("Client Registered Successfully");
       window.location.reload();
@@ -72,24 +65,11 @@ const AddClient = ({ token }) => {
     }
   };
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
@@ -130,7 +110,7 @@ const AddClient = ({ token }) => {
                 <div className="col-lg-6 text-end py-auto">
                   <div className="text-end mt-3">
                     <Link
-                      to={`/developerhandleclients?uid=${uid}`}
+                      to={`/developerhandleclients?uid=${encryptedUID}`}
                       className="text-decoration-none"
                     >
                       <button className="btn blue-buttons btn-lg mx-3">

@@ -18,7 +18,7 @@ const ForgetPass = () => {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/forget_password`,
+        `${process.env.REACT_APP_BASE_URL}/auth/forget_password`,
         { email }
       );
       setSuccessMessage(response.data.message);

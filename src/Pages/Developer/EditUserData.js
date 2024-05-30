@@ -3,8 +3,9 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -19,11 +20,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const storage = firebase.storage();
 
-const EditUserData = ({ token }) => {
+const EditUserData = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [errorMessage, setErrorMessage] = useState("");
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const userProfileID = new URLSearchParams(location.search).get(
     "user_profile_id"
   );
@@ -37,26 +39,19 @@ const EditUserData = ({ token }) => {
     name: "",
     uid: "",
   });
-  console.log("UserId: ", uid);
 
   const BackToLogin = () => {
     navigate("/");
   };
 
-  const storedToken = localStorage.getItem("token");
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/getIndividualUserTeamData/${userProfileID}`,
-          { headers }
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/getIndividualUserTeamData/${userProfileID}`,
+          { decryptedUID }
         );
-        console.log("UserProfileID :", userProfileID);
+
         setUserData(response.data.userData);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -64,7 +59,7 @@ const EditUserData = ({ token }) => {
     };
 
     fetchData();
-  }, [storedToken, userProfileID]);
+  }, [decryptedUID, userProfileID]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -85,25 +80,17 @@ const EditUserData = ({ token }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       const imageFile = userData.profile_img;
       const imageRef = storage
         .ref()
-        .child(`profile_images/${uid}_${imageFile.name}`);
+        .child(`profile_images/${decryptedUID}_${imageFile.name}`);
       await imageRef.put(imageFile, { contentType: "image/jpeg" });
       const imageUrl = await imageRef.getDownloadURL();
 
       const updatedUserData = { ...userData, profile_img: imageUrl };
-      console.log("Profile_img", userData.profile_img);
-      await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/postIndividualUserTeamData`,
-        updatedUserData,
-        {
-          headers,
-        }
+      await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/admin/postIndividualUserTeamData`,
+        { updatedUserData, decryptedUID }
       );
 
       alert("Profile SetUp Completed");
@@ -116,24 +103,12 @@ const EditUserData = ({ token }) => {
       }
     }
   };
-  
-  if (!uid) {
+
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
@@ -252,7 +227,7 @@ const EditUserData = ({ token }) => {
                     />
                   </div>
                   <div className="form-floating mb-3">
-                    <textarea
+                    <input
                       name="address"
                       className="form-control admin-profile-inputs"
                       placeholder="Leave a comment here"

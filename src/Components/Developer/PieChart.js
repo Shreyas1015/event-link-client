@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
-import axios from "axios";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const PieChart = () => {
   const [pieChartData, setPieChartData] = useState([]);
-  const storedToken = localStorage.getItem("token");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/getPieChart`,
-          { headers }
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/getPieChart`,
+          { decryptedUID }
         );
         setPieChartData(response.data.pieChart);
       } catch (error) {
@@ -26,7 +25,7 @@ const PieChart = () => {
     };
 
     fetchData();
-  }, [storedToken]);
+  }, [decryptedUID]);
 
   const data = {
     labels: pieChartData.map((item) => item.feedback_name),
@@ -50,7 +49,7 @@ const PieChart = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: "right", 
+        position: "right",
         labels: {
           fontSize: 26,
         },

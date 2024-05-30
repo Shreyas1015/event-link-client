@@ -1,8 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import secureLocalStorage from "react-secure-storage";
 
 const DeveloperSidebar = () => {
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
 
   return (
     <>
@@ -15,7 +16,7 @@ const DeveloperSidebar = () => {
         </h5>
         <Link
           className="text-decoration-none "
-          to={`/developerdashboard?uid=${uid}`}
+          to={`/developerdashboard?uid=${encryptedUID}`}
         >
           <li className="sidebar-li my-2 p-3 mx-2 text-blue rounded-3">
             <i className="fa-solid fa-user me-2"></i> Dashboard
@@ -26,7 +27,7 @@ const DeveloperSidebar = () => {
         <ul className="mx-2 p-0" style={{ listStyle: "none" }}>
           <Link
             className="text-decoration-none"
-            to={`/developeradminteam?uid=${uid}`}
+            to={`/developeradminteam?uid=${encryptedUID}`}
           >
             <li className="py-2 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Admins
@@ -34,7 +35,7 @@ const DeveloperSidebar = () => {
           </Link>
           <Link
             className="text-decoration-none"
-            to={`/developeruserteam?uid=${uid}`}
+            to={`/developeruserteam?uid=${encryptedUID}`}
           >
             <li className="py-2 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Users
@@ -45,7 +46,7 @@ const DeveloperSidebar = () => {
         <ul className="mx-2 p-0" style={{ listStyle: "none" }}>
           <Link
             className="text-decoration-none"
-            to={`/developerhandleclients?uid=${uid}`}
+            to={`/developerhandleclients?uid=${encryptedUID}`}
           >
             <li className="py-2 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Client Data
@@ -53,7 +54,7 @@ const DeveloperSidebar = () => {
           </Link>
           <Link
             className="text-decoration-none"
-            to={`/developerfeedbacks?uid=${uid}`}
+            to={`/developerfeedbacks?uid=${encryptedUID}`}
           >
             <li className="py-2 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Feedbacks
@@ -64,7 +65,7 @@ const DeveloperSidebar = () => {
         <ul className="mx-2 p-0" style={{ listStyle: "none" }}>
           <Link
             className="text-decoration-none"
-            to={`/developerbargraph?uid=${uid}`}
+            to={`/developerbargraph?uid=${encryptedUID}`}
           >
             <li className="py-2 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Bar Graph
@@ -72,7 +73,7 @@ const DeveloperSidebar = () => {
           </Link>
           <Link
             className="text-decoration-none"
-            to={`/developerpiechart?uid=${uid}`}
+            to={`/developerpiechart?uid=${encryptedUID}`}
           >
             <li className="py-2 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Pie Chart
@@ -80,13 +81,16 @@ const DeveloperSidebar = () => {
           </Link>
           <Link
             className="text-decoration-none"
-            to={`/developerlinegraph?uid=${uid}`}
+            to={`/developerlinegraph?uid=${encryptedUID}`}
           >
             <li className="py-2 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Line Graph
             </li>
           </Link>
-          <Link className="text-decoration-none" to={`/developer?uid=${uid}`}>
+          <Link
+            className="text-decoration-none"
+            to={`/developer?uid=${encryptedUID}`}
+          >
             <li className="pt-2 pb-3 px-3 my-1 text-blue rounded-3">
               <i className="fa-solid fa-user me-2"></i> Geo - Graph
             </li>

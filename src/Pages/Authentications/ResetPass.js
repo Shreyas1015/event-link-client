@@ -39,7 +39,7 @@ const ResetPass = () => {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/reset_password`,
+        `${process.env.REACT_APP_BASE_URL}/auth/reset_password`,
         formData
       );
       console.log("Response from server:", response.data);

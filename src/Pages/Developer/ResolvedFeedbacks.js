@@ -1,10 +1,12 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
+
 import DeveloperSidebar from "../../Components/Developer/DeveloperSidebar";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import TitleAndLogout from "../../Components/Developer/TitleAndLogout";
+import axiosInstance from "../../API/axiosInstance";
+import secureLocalStorage from "react-secure-storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -18,28 +20,23 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const ResolvedFeedbacks = ({ token }) => {
+const ResolvedFeedbacks = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
+
   const [feedbackData, setFeedbackData] = useState([]);
-  console.log("UserId: ", uid);
 
   const BackToLogin = () => {
     navigate("/");
   };
 
-  const storedToken = localStorage.getItem("token");
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${storedToken}`,
-        };
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/get_resolved_feedbacks`,
-          { headers }
+        const response = await axiosInstance.post(
+          `${process.env.REACT_APP_BASE_URL}/admin/get_resolved_feedbacks`,
+          { decryptedUID }
         );
         setFeedbackData(response.data.feedback);
       } catch (error) {
@@ -48,26 +45,13 @@ const ResolvedFeedbacks = ({ token }) => {
     };
 
     fetchData();
-  }, [storedToken]);
+  }, [decryptedUID]);
 
-  if (!uid) {
+  if (!decryptedUID) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>You must be logged in to access this page.</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
@@ -100,7 +84,7 @@ const ResolvedFeedbacks = ({ token }) => {
             <TitleAndLogout title="All Feedback Data" />
             <hr className="my-3 p-0" style={{ color: "white" }} />
             <div className="text-end">
-              <Link to={`/developerfeedbacks?uid=${uid}`}>
+              <Link to={`/developerfeedbacks?uid=${encryptedUID}`}>
                 <button className="btn blue-buttons btn-lg">
                   Pending Feedbacks
                 </button>

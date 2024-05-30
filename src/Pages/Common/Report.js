@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import AdminSidebar from "../../Components/Admin/AdminSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
 import RatingInput from "../../Components/Common/RatingInput";
+import axiosInstance from "../../API/axiosInstance";
+import secureLocalStorage from "react-secure-storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -21,10 +22,11 @@ firebase.initializeApp(firebaseConfig);
 
 const storage = firebase.storage();
 
-const Report = ({ token }) => {
+const Report = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const adminID = new URLSearchParams(location.search).get("admin_id");
   const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
@@ -36,7 +38,7 @@ const Report = ({ token }) => {
     ratings: "",
     attachments: "",
     contact_preference_id: "",
-    uid: uid,
+    uid: decryptedUID,
     admin_id: adminID,
   });
 
@@ -59,12 +61,10 @@ const Report = ({ token }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       const imageFile = formData.attachments;
-      const imageRef = storage.ref().child(`Feebacks/${uid}_${imageFile.name}`);
+      const imageRef = storage
+        .ref()
+        .child(`Feebacks/${decryptedUID}_${imageFile.name}`);
       await imageRef.put(imageFile, { contentType: "image/jpeg" });
       const imageUrl = await imageRef.getDownloadURL();
 
@@ -74,12 +74,9 @@ const Report = ({ token }) => {
         ratings: formData.ratings,
       };
 
-      await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/submit_feedback`,
-        updatedFormData,
-        {
-          headers,
-        }
+      await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/c-admin/submit_feedback`,
+        { updatedFormData, decryptedUID }
       );
 
       alert("FeedBack Submitted Successfully");
@@ -94,7 +91,7 @@ const Report = ({ token }) => {
         contact_preference_id: "",
       });
 
-      navigate(`/dashboard?uid=${uid}&admin_id=${adminID}`);
+      navigate(`/dashboard?uid=${encryptedUID}&admin_id=${adminID}`);
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
@@ -109,24 +106,11 @@ const Report = ({ token }) => {
     navigate("/");
   };
 
-  if (!(uid && adminID)) {
+  if (!(encryptedUID && adminID)) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>LOGIN TO ACCESS FURTHER</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
@@ -253,7 +237,6 @@ const Report = ({ token }) => {
                   <RatingInput
                     value={formData.ratings}
                     onChange={(value) => {
-                      console.log("Selected rating:", value);
                       setFormData({ ...formData, ratings: value });
                     }}
                   />

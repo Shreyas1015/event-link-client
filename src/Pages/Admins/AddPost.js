@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import AdminSidebar from "../../Components/Admin/AdminSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
+import secureLocalStorage from "react-secure-storage";
+import axiosInstance from "../../API/axiosInstance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -20,10 +21,11 @@ firebase.initializeApp(firebaseConfig);
 
 const storage = firebase.storage();
 
-const AddPost = ({ token }) => {
+const AddPost = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const uid = new URLSearchParams(location.search).get("uid");
+  const decryptedUID = secureLocalStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const adminID = new URLSearchParams(location.search).get("admin_id");
   const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
@@ -36,7 +38,7 @@ const AddPost = ({ token }) => {
     email: "",
     venue: "",
     google_form_link: "",
-    uid: uid,
+    uid: decryptedUID,
     admin_id: adminID,
   });
 
@@ -59,41 +61,42 @@ const AddPost = ({ token }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       const imageFile = formData.cover_img;
       const imageRef = storage
         .ref()
-        .child(`All_Posts_Images/${uid}_${imageFile.name}`);
+        .child(`All_Posts_Images/${decryptedUID}_${imageFile.name}`);
       await imageRef.put(imageFile, { contentType: "image/jpeg" });
       const imageUrl = await imageRef.getDownloadURL();
 
       const updatedFormData = { ...formData, cover_img: imageUrl };
 
-      await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/add_posts`,
-        updatedFormData,
+      const res = await axiosInstance.post(
+        `${process.env.REACT_APP_BASE_URL}/c-admin/add_posts`,
         {
-          headers,
+          updatedFormData,
+          decryptedUID,
         }
       );
 
-      alert("Post Added Successfully");
-      setFormData({
-        cover_img: "",
-        event_date: "",
-        event_name: "",
-        event_desc: "",
-        category_id: "",
-        contact: "",
-        email: "",
-        google_form_link: "",
-        venue: "",
-      });
+      if (res.status === 201) {
+        const postID = res.data.post_id;
+        secureLocalStorage.setItem("post_id", postID);
+        alert("Post Added Successfully");
 
-      navigate(`/dashboard?uid=${uid}&admin_id=${adminID}`);
+        setFormData({
+          cover_img: "",
+          event_date: "",
+          event_name: "",
+          event_desc: "",
+          category_id: "",
+          contact: "",
+          email: "",
+          google_form_link: "",
+          venue: "",
+        });
+      }
+
+      navigate(`/dashboard?uid=${encryptedUID}&admin_id=${adminID}`);
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
@@ -108,24 +111,11 @@ const AddPost = ({ token }) => {
     navigate("/");
   };
 
-  if (!(uid && adminID)) {
+  if (!(decryptedUID && adminID)) {
     return (
       <>
         <div className="container text-center fw-bold">
           <h2>INVALID URL. Please provide a valid UID.</h2>
-          <button onClick={BackToLogin} className="btn blue-buttons">
-            Back to Login
-          </button>
-        </div>
-      </>
-    );
-  }
-
-  if (!token) {
-    return (
-      <>
-        <div className="container text-center fw-bold">
-          <h2>LOGIN TO ACCESS FURTHER</h2>
           <button onClick={BackToLogin} className="btn blue-buttons">
             Back to Login
           </button>
