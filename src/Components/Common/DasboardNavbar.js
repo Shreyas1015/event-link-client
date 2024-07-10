@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 
-const DasboardNavbar = ({ onSearch }) => {
-  const [searchInput, setSearchInput] = useState("");
+const DasboardNavbar = () => {
+  // const [searchInput, setSearchInput] = useState("");
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    console.log("Search Input:", searchInput);
-    onSearch(searchInput);
-  };
+  // const handleSearchSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log("Search Input:", searchInput);
+  //   onSearch(searchInput);
+  // };
   return (
     <>
       <nav
@@ -51,23 +51,6 @@ const DasboardNavbar = ({ onSearch }) => {
             </div>
             <div className="offcanvas-body">
               <ul className="navbar-nav justify-content-end flex-grow-1 pe-3"></ul>
-              <form
-                className="d-flex"
-                role="search"
-                onSubmit={handleSearchSubmit}
-              >
-                <input
-                  className="form-control me-2"
-                  type="search"
-                  placeholder="Search"
-                  aria-label="Search"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <button className="btn btn-outline-light" type="submit">
-                  Search
-                </button>
-              </form>
             </div>
           </div>
         </div>
