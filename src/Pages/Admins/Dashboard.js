@@ -5,12 +5,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import BackgroundVideoCopy from "../../Components/Common/BackgroundVideoCopy";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const decryptedUID = secureLocalStorage.getItem("uid");
-  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const adminID = new URLSearchParams(location.search).get("admin_id");
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,8 +62,9 @@ const Dashboard = () => {
       setPosts((prevPosts) =>
         prevPosts.filter((post) => post.posts_id !== postID)
       );
+      toast.success("Post Deleted Successfully");
     } catch (error) {
-      console.error("Error deleting post:", error);
+      toast.error("Error deleting post:", error);
     }
   };
 
@@ -86,12 +87,12 @@ const Dashboard = () => {
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col-lg-3 col-md-3 col-sm-3 col-3 sidebar"
+            className="col-lg-3 col-md-0 col-sm-0 col-0 sidebar"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
             <AdminSidebar />
           </div>
-          <div className="col-lg-9 col-md-9 col-sm-9 col-9">
+          <div className="col-lg-9 col-md-12 col-sm-12 col-12">
             <div className="containers" style={{ width: "100%" }}>
               <BackgroundVideoCopy />
             </div>

@@ -7,6 +7,7 @@ import "firebase/compat/storage";
 import RatingInput from "../../Components/Common/RatingInput";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
+import toast from "react-hot-toast";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -28,7 +29,6 @@ const Report = () => {
   const decryptedUID = secureLocalStorage.getItem("uid");
   const encryptedUID = localStorage.getItem("@secure.n.uid");
   const adminID = new URLSearchParams(location.search).get("admin_id");
-  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -79,7 +79,7 @@ const Report = () => {
         { updatedFormData, decryptedUID }
       );
 
-      alert("FeedBack Submitted Successfully");
+      toast.success("FeedBack Submitted Successfully");
       setFormData({
         name: "",
         email: "",
@@ -95,9 +95,9 @@ const Report = () => {
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
-        setErrorMessage(error.response.data.error);
+        toast.error(error.response.data.error);
       } else {
-        setErrorMessage("An error occurred during post addition.");
+        toast.error("An error occurred during post addition.");
       }
     }
   };
@@ -125,12 +125,12 @@ const Report = () => {
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col-lg-3 col-md-3 col-sm-3 col-3 sidebar"
+            className="col-lg-3 col-md-0 col-sm-0 col-0 sidebar"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
             <AdminSidebar />
           </div>
-          <div className="col-lg-9 col-md-9 col-sm-9 col-9">
+          <div className="col-lg-9 col-md-12 col-sm-12 col-12">
             <div className="container my-3">
               <h1>Report / FeedBack</h1>
               <hr />
@@ -290,9 +290,6 @@ const Report = () => {
                     className="btn blue-buttons admin-profile-inputs"
                     value="Submit"
                   />
-                </div>
-                <div className="mb-3">
-                  <h3>{errorMessage}</h3>
                 </div>
               </form>
             </div>

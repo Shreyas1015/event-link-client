@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import secureLocalStorage from "react-secure-storage";
@@ -6,7 +5,7 @@ import axiosInstance from "../../API/axiosInstance";
 
 const UserSidebar = () => {
   const navigate = useNavigate();
-  const encryptedUID = localStorage.getItem("uid");
+  const encryptedUID = localStorage.getItem("@secure.n.uid");
   const decryptedUID = secureLocalStorage.getItem("uid");
 
   const [UserProfileID, setUserProfileID] = useState("");
@@ -49,7 +48,7 @@ const UserSidebar = () => {
   };
 
   return (
-    <>
+    <div div className="d-none d-lg-block">
       {/* My Profile */}
       <ul className="m-4 p-0" style={{ listStyle: "none" }}>
         <Link
@@ -91,7 +90,7 @@ const UserSidebar = () => {
           </Link>
         )}
       </ul>
-    </>
+    </div>
   );
 };
 

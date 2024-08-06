@@ -66,7 +66,7 @@ const SignUpPage = () => {
         <div className="row">
           <div className="col-lg-6 m-0 p-0">
             <img
-              className="img-fluid"
+              className="img-fluid d-none d-lg-block"
               style={{ height: "100vh", objectFit: "cover" }}
               src="/Images/Logo 1.png"
               alt=""

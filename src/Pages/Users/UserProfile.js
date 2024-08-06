@@ -6,6 +6,7 @@ import DasboardNavbar from "../../Components/Common/DasboardNavbar";
 import UserSidebar from "../../Components/Users/UserSidebar";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import toast from "react-hot-toast";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -24,9 +25,6 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const decryptedUID = secureLocalStorage.getItem("uid");
   const encryptedUID = localStorage.getItem("uid");
-
-  const [errorMessage, setErrorMessage] = useState("");
-
   const [userProfileID, setUserProfileID] = useState("");
   const [formData, setFormData] = useState({
     profile_img: "",
@@ -77,7 +75,7 @@ const UserProfile = () => {
           });
         }
       } catch (error) {
-        console.error("Error fetching admin profile data:", error);
+        toast.error("Error fetching admin profile data:", error);
       }
     }
 
@@ -121,7 +119,7 @@ const UserProfile = () => {
         { updatedFormData, decryptedUID }
       );
 
-      alert("Profile SetUp Completed");
+      toast.success("Profile SetUp Completed");
       const newuserProfileID = response.data.user_profile_id;
 
       if (userProfileID) {
@@ -146,9 +144,9 @@ const UserProfile = () => {
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
-        setErrorMessage(error.response.data.error);
+        toast.error(error.response.data.error);
       } else {
-        setErrorMessage("An error occurred during profile setup.");
+        toast.error("An error occurred during profile setup.");
       }
     }
   };
@@ -181,14 +179,14 @@ const UserProfile = () => {
         <div className="row">
           {/* Sidebar */}
           <div
-            className="col-lg-3 col-md-3 col-sm-3 col-3 sidebar"
+            className="col-lg-3 col-md-0 col-sm-0 col-0 sidebar"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
             {/* My Profile */}
             <UserSidebar />
           </div>
           {/* Analysis */}
-          <div className="col-lg-9 col-md-9 col-sm-9 col-9">
+          <div className="col-lg-9 col-md-12 col-sm-12 col-12">
             <div className="container my-3">
               <h1 className="fw-bolder">My Profile</h1>
               <hr />
@@ -287,9 +285,7 @@ const UserProfile = () => {
                   <label htmlFor="clg_address">College Address</label>
                 </div>
                 {updateNote}
-                <div className="mb-3">
-                  <h3>{errorMessage}</h3>
-                </div>
+
                 <div className="mb-3">
                   <input
                     type="submit"

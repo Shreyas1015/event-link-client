@@ -7,6 +7,7 @@ import RatingInput from "../../Components/Common/RatingInput";
 import UserSidebar from "../../Components/Users/UserSidebar";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import toast from "react-hot-toast";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -30,7 +31,6 @@ const Report = () => {
   const userProfileID = new URLSearchParams(location.search).get(
     "user_profile_id"
   );
-  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -81,7 +81,7 @@ const Report = () => {
         { updatedFormData, decryptedUID }
       );
 
-      alert("FeedBack Submitted Successfully");
+      toast.success("FeedBack Submitted Successfully");
       setFormData({
         name: "",
         email: "",
@@ -99,9 +99,9 @@ const Report = () => {
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
-        setErrorMessage(error.response.data.error);
+        toast.error(error.response.data.error);
       } else {
-        setErrorMessage("An error occurred during post addition.");
+        toast.error("An error occurred during post addition.");
       }
     }
   };
@@ -294,9 +294,6 @@ const Report = () => {
                     className="btn blue-buttons admin-profile-inputs"
                     value="Submit"
                   />
-                </div>
-                <div className="mb-3">
-                  <h3>{errorMessage}</h3>
                 </div>
               </form>
             </div>

@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import UserSidebar from "../../Components/Users/UserSidebar";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import toast from "react-hot-toast";
 
 const ShowPost = () => {
   const location = useLocation();
@@ -48,7 +49,7 @@ const ShowPost = () => {
           venue: postData.venue,
         });
       } catch (error) {
-        console.error("Error fetching post data:", error);
+        toast.error("Error fetching post data:", error);
       }
     }
 
@@ -61,12 +62,12 @@ const ShowPost = () => {
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col-lg-3 col-md-3 col-sm-3 col-3 sidebar"
+            className="col-lg-3 col-md-0 col-sm-0 col-0 sidebar"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
             <UserSidebar />
           </div>
-          <div className="col-lg-9 col-md-9 col-sm-9 col-9">
+          <div className="col-lg-9 col-md-12 col-sm-12 col-12">
             <div className="container my-5 ">
               <div className="container glassomorphic-effect rounded-4 show-post-container mx-auto p-0 rounded-4 overflow-hidden">
                 {/* Image */}
@@ -89,7 +90,7 @@ const ShowPost = () => {
                   </h1>
                 </div>
                 <div className="row mb-3">
-                  <div className="col-lg-6 border-end ps-5 pe-3 py-2">
+                  <div className="col-lg-6 border-end px-3 py-2">
                     {/* Desc */}
                     <div className="form-floating">
                       <p>

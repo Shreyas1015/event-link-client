@@ -8,7 +8,7 @@ const DeveloperSidebar = () => {
   return (
     <>
       <div
-        className="container-fluid glassomorphic-effect p-0 my-2 rounded-4"
+        className="container-fluid glassomorphic-effect p-0 my-2 rounded-4 d-none d-lg-block"
         style={{ listStyle: "none" }}
       >
         <h5 className="text-center py-3 fixed-blue rounded-top-4">

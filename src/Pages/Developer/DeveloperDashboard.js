@@ -126,39 +126,39 @@ const DeveloperDashboard = () => {
       <div className="container-fluid" style={{ backgroundColor: "#272727" }}>
         <div className="row">
           <div
-            className="col-lg-2 col-md-2 col-sm-3 col-3 sidebar"
+            className="col-lg-2 col-md-0 col-sm-0 col-0 sidebar"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
             {/* Sidebar */}
             <DeveloperSidebar />
           </div>
           {/* Analysis */}
-          <div className="col-lg-10 col-md-9 col-sm-9 col-9">
+          <div className="col-lg-10 col-md-12 col-sm-12 col-12">
             <TitleAndLogout title="Dashboard" />
             <hr className="my-3 p-0" style={{ color: "white" }} />
             <div className="row my-3">
-              <div className="col-lg-3">
+              <div className="col-lg-3 col-6">
                 <DeveloperCountBox
                   title="Total No. Of Admins"
                   count={adminCount}
                   status="+5 added"
                 />
               </div>
-              <div className="col-lg-3">
+              <div className="col-lg-3 col-6">
                 <DeveloperCountBox
                   title="Total No. Of Users"
                   count={usersCount}
                   status="+5 added"
                 />
               </div>
-              <div className="col-lg-3">
+              <div className="col-lg-3 col-6">
                 <DeveloperCountBox
                   title="Total No. Of Feedbacks"
                   count={feedbackCount}
                   status="+5 added"
                 />
               </div>
-              <div className="col-lg-3">
+              <div className="col-lg-3 col-6">
                 <DeveloperCountBox
                   title="Total No. Of Posts"
                   count={postsCount}

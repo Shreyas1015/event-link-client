@@ -107,7 +107,7 @@ const AdminData = () => {
         style={{ backgroundColor: "#272727", minHeight: "100vh" }}
       >
         <div
-          className="col-lg-2 col-md-2 col-sm-3 col-3 sidebar z-2"
+          className="col-lg-2 col-md-0 col-sm-0 col-0 sidebar z-2"
           style={{
             backgroundColor: "#272727",
             height: "auto",
@@ -119,8 +119,8 @@ const AdminData = () => {
         </div>
         <div className="row">
           {/* Analysis */}
-          <div className="col-lg-2"></div>
-          <div className="col-lg-10 col-md-9 col-sm-9 col-9 px-4">
+          <div className="col-lg-2 col-md-0 col-0"></div>
+          <div className="col-lg-10 col-md-12 col-sm-12 col-12 px-4">
             <TitleAndLogout title="Admin Data" />
             <hr className="my-3 p-0" style={{ color: "white" }} />
             <button

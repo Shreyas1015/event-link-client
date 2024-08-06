@@ -77,13 +77,12 @@ const UserDashboard = () => {
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col-lg-3 col-md-3 col-sm-3 col-3 m-0 p-0"
+            className="col-lg-3 col-md-0 col-sm-0 col-0 m-0 p-0"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
             <UserSidebar />
           </div>
-          {/* <div className="col-lg-3 col-md-3 col-sm-3 col-3 m-0 p-0"></div> */}
-          <div className="col-lg-9 col-md-9 col-sm-9 col-9">
+          <div className="col-lg-9 col-md-12 col-sm-12 col-12">
             <div className="containers" style={{ width: "100%" }}>
               <BackgroundVideoCopy />
             </div>
@@ -132,37 +131,48 @@ const UserDashboard = () => {
                   </label>
                 </div>
                 <div className="col-lg-9">
-                  <div className="my-1">
-                    <button
-                      className="btn btn-outline-dark mx-2 btn-lg"
-                      onClick={() => setSelectedCategory("all")}
-                    >
-                      All Categories
-                    </button>
-                    <button
-                      className="btn btn-outline-dark mx-2 btn-lg"
-                      onClick={() => setSelectedCategory("1")}
-                    >
-                      Cultural
-                    </button>
-                    <button
-                      className="btn btn-outline-dark mx-2 btn-lg"
-                      onClick={() => setSelectedCategory("2")}
-                    >
-                      Social
-                    </button>
-                    <button
-                      className="btn btn-outline-dark mx-2 btn-lg"
-                      onClick={() => setSelectedCategory("3")}
-                    >
-                      Technical
-                    </button>
-                    <button
-                      className="btn btn-outline-dark mx-2 btn-lg"
-                      onClick={() => setSelectedCategory("4")}
-                    >
-                      Placement
-                    </button>
+                  <div className="row text-center">
+                    <div className="col-12 col-lg-4">
+                      <button
+                        className="btn btn-outline-dark my-2 btn-md"
+                        onClick={() => setSelectedCategory("all")}
+                      >
+                        All Categories
+                      </button>
+                    </div>
+                    <div className="col-6 col-lg-2">
+                      <button
+                        className="btn btn-outline-dark my-2 btn-md"
+                        onClick={() => setSelectedCategory("1")}
+                      >
+                        Cultural
+                      </button>
+                    </div>
+                    <div className="col-6 col-lg-2">
+                      <button
+                        className="btn btn-outline-dark my-2 btn-md"
+                        onClick={() => setSelectedCategory("2")}
+                      >
+                        Social
+                      </button>
+                    </div>
+                    <div className="col-6 col-lg-2">
+                      {" "}
+                      <button
+                        className="btn btn-outline-dark my-2 btn-md"
+                        onClick={() => setSelectedCategory("3")}
+                      >
+                        Technical
+                      </button>
+                    </div>
+                    <div className="col-6 col-lg-2">
+                      <button
+                        className="btn btn-outline-dark my-2 btn-md"
+                        onClick={() => setSelectedCategory("4")}
+                      >
+                        Placement
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

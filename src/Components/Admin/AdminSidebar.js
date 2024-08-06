@@ -48,8 +48,7 @@ const AdminSidebar = () => {
   };
 
   return (
-    <>
-      {/* My Profile */}
+    <div className="d-none d-lg-block">
       <ul className="m-4 p-0" style={{ listStyle: "none" }}>
         <Link
           className="text-decoration-none"
@@ -59,7 +58,6 @@ const AdminSidebar = () => {
             <i className="fa-solid fa-user fa-bounce me-2"></i> My Profile
           </li>
         </Link>
-        {/* Render the Dashboard link only if adminID is available */}
         {adminID && (
           <Link
             className="text-decoration-none"
@@ -70,7 +68,6 @@ const AdminSidebar = () => {
             </li>
           </Link>
         )}
-        {/* Construct the Add Post link only if adminID is available */}
         {adminID && (
           <Link
             className="text-decoration-none"
@@ -101,7 +98,7 @@ const AdminSidebar = () => {
           </Link>
         )}
       </ul>
-    </>
+    </div>
   );
 };
 

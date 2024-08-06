@@ -6,6 +6,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import toast from "react-hot-toast";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC3-kql5gHN8ZQRaFkrwWDBE8ksC5SbdAk",
@@ -25,8 +26,6 @@ const AdminProfile = () => {
   const navigate = useNavigate();
   const decryptedUID = secureLocalStorage.getItem("uid");
   const encryptedUID = localStorage.getItem("@secure.n.uid");
-
-  const [errorMessage, setErrorMessage] = useState("");
   const [adminID, setAdminID] = useState("");
   const [formData, setFormData] = useState({
     profile_img: "",
@@ -90,7 +89,7 @@ const AdminProfile = () => {
           });
         }
       } catch (error) {
-        console.error("Error fetching admin profile data:", error);
+        toast.error("Error fetching admin profile data:", error);
       }
     }
 
@@ -106,7 +105,7 @@ const AdminProfile = () => {
     try {
       const imageFile = formData.profile_img;
       if (!imageFile) {
-        alert("No image file selected.");
+        toast.error("No image file selected.");
         return;
       }
       const imageRef = storage
@@ -122,7 +121,7 @@ const AdminProfile = () => {
         { updatedFormData, decryptedUID }
       );
 
-      alert("Profile SetUp Completed");
+      toast.success("Profile SetUp Completed");
       const newAdminID = response.data.admin_id;
 
       if (adminID) {
@@ -142,9 +141,9 @@ const AdminProfile = () => {
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
-        setErrorMessage(error.response.data.error);
+        toast.error(error.response.data.error);
       } else {
-        setErrorMessage("An error occurred during profile setup.");
+        toast.error("An error occurred during profile setup.");
       }
     }
   };
@@ -178,14 +177,14 @@ const AdminProfile = () => {
         <div className="row">
           {/* Sidebar */}
           <div
-            className="col-lg-3 col-md-3 col-sm-3 col-3 sidebar"
+            className="col-lg-3 col-md-0 col-sm-0 col-0 sidebar d-none d-lg-block"
             style={{ backgroundColor: "#272727", height: "auto" }}
           >
             {/* My Profile */}
             <AdminSidebar />
           </div>
           {/* Analysis */}
-          <div className="col-lg-9 col-md-9 col-sm-9 col-9">
+          <div className="col-lg-9 col-md-12 col-sm-12 col-12">
             <div className="container my-3">
               <h1 className="fw-bolder">My Profile</h1>
               <hr />
@@ -270,9 +269,7 @@ const AdminProfile = () => {
                   <label htmlFor="address">College Address</label>
                 </div>
                 {updateNote}
-                <div className="mb-3">
-                  <h3>{errorMessage}</h3>
-                </div>
+
                 <div className="mb-3">
                   <input
                     type="submit"

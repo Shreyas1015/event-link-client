@@ -3,11 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import BackgroundVideo from "../../Components/Common/BackgroundVideo";
 import axiosInstance from "../../API/axiosInstance";
 import secureLocalStorage from "react-secure-storage";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -48,13 +48,13 @@ const LoginPage = () => {
       } else if (decryptedUserType == 3) {
         navigate(`/developerdashboard?uid=${encryptedUID}`);
       }
-      alert("Logged In Successfully");
+      toast.success("Logged In Successfully");
     } catch (error) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
-        setErrorMessage(error.response.data.error);
+        toast.error(error.response.data.error);
       } else {
-        setErrorMessage("An error occurred during login.");
+        toast.error("An error occurred during login.");
       }
     }
   };
@@ -66,7 +66,7 @@ const LoginPage = () => {
         <div className="row">
           <div className="col-lg-6 m-0 p-0">
             <img
-              className="img-fluid"
+              className="img-fluid d-none d-lg-block"
               style={{ height: "100vh", objectFit: "cover" }}
               src="/Images/Logo 1.png"
               alt=""
@@ -124,9 +124,7 @@ const LoginPage = () => {
                     </button>
                   </div>
                 </div>
-                <div className="mb-1">
-                  <h5 className="text-danger">{errorMessage}</h5>
-                </div>
+
                 <br />
                 <div className="row">
                   <div className="col-lg-6">

@@ -58,7 +58,7 @@ li:hover {
 
 .login-text {
   color: #62c1bf;
-  width: 24rem;
+  width: 95%;
 }
 
 .blue-text {
@@ -256,4 +256,84 @@ tr {
   background-color: #fff;
   border-color: #189cf0;
   color: #189cf0;
+}
+
+@media screen and (max-width: 991px) {
+  .login-container {
+    position: relative;
+    top: 8vh;
+    left: 2vw;
+    width: 90%;
+  }
+  .login-text {
+    width: 95%;
+  }
+  .signup-container {
+    position: relative;
+    top: 5vh;
+    left: 2vw;
+    width: 90%;
+  }
+  .form-container {
+    width: 90%;
+  }
+
+  .show-post-container {
+    width: 88vw;
+  }
+  .report-li {
+    width: 85vw;
+    margin-left: 2.7rem !important;
+  }
+  .star-size {
+    width: 5vw;
+  }
+  .admin-profile-inputs {
+    width: 70vw;
+  }
+  .dashboard-title-img {
+    width: 27vw;
+    height: 18vh;
+    top: 8vw;
+    left: 2vw;
+  }
+  .dashboard-background-img {
+    height: 5rem;
+  }
+  .show-post-image {
+    max-height: 40vh;
+  }
+  .show-post-title-text {
+    font-size: 2rem;
+  }
+  .admin-team-img {
+    height: 10vh;
+    width: 5vw;
+  }
+  .table th {
+    padding: 0.5rem 0.5rem;
+  }
+  .brand-img {
+    width: auto;
+    height: 10vh;
+  }
+  .profile-info {
+    width: 90%;
+  }
+  .profile-info p {
+    font-size: 9px;
+    margin-bottom: 5px !important;
+  }
+  .profile-info h2 {
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .card {
+    width: 18rem !important;
+  }
+  .show-post-container p,
+  a {
+    font-size: 12px;
+  }
 }
