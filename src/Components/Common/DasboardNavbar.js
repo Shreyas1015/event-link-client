@@ -391,7 +391,6 @@ const DasboardNavbar = () => {
                     className="py-3 px-3 sidebar-li my-2 blue-buttons rounded-3"
                     onClick={() => {
                       handleLogout();
-                      handlePageRefresh();
                     }}
                   >
                     <i className="fa-solid fa-arrow-right-from-bracket fa-bounce me-2" />
