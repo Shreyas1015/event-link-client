@@ -26,11 +26,52 @@ import Linegraph from "./Pages/Developer/LineGraph";
 import PieChart from "./Pages/Developer/PieChart";
 import BarGraph from "./Pages/Developer/BarGraph";
 import ErrorPage from "./Pages/Authentications/ErrorPage";
+import Loading from "./Components/Loading";
+import axiosInstance from "./API/axiosInstance";
 
 const App = () => {
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const requestInterceptor = axiosInstance.interceptors.request.use(
+      (config) => {
+        // Skip loading if the flag is set
+        if (!config.skipLoading) {
+          setLoading(true);
+        }
+        return config;
+      },
+      (error) => {
+        setLoading(false);
+        return Promise.reject(error);
+      }
+    );
+
+    const responseInterceptor = axiosInstance.interceptors.response.use(
+      (response) => {
+        // Skip loading if the flag is set
+        if (!response.config.skipLoading) {
+          setLoading(false);
+        }
+        return response;
+      },
+      (error) => {
+        if (!error.config?.skipLoading) {
+          setLoading(false);
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axiosInstance.interceptors.request.eject(requestInterceptor);
+      axiosInstance.interceptors.response.eject(responseInterceptor);
+    };
+  }, []);
+
   return (
     <>
       <Router>
+        <Loading show={loading} />
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
