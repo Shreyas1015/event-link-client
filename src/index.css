@@ -35,27 +35,83 @@ li:hover {
   border-color: #62c1bf;
 }
 
+/* index.css */
+
 .loading-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.7);
-  /* White background with opacity */
-  backdrop-filter: blur(5px);
-  /* Blur effect for supported browsers */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  /* High z-index to cover other elements */
 }
 
 .loading-content {
-  position: relative;
-  z-index: 10000;
-  /* Ensure the loading text appears above the backdrop */
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: #2980b9;
+  border-radius: 50%;
+  margin: 0 4px;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  to {
+    transform: translateY(-8px);
+  }
+}
+
+.loading-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2980b9;
+  margin-bottom: 8px;
+}
+
+.loading-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .loading-content {
+    padding: 16px;
+  }
+
+  .loading-title {
+    font-size: 18px;
+  }
+
+  .loading-subtitle {
+    font-size: 12px;
+  }
 }
 .blue-buttons:hover {
   color: black;
