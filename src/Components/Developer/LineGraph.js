@@ -14,7 +14,7 @@ CharJs.register(LineElement, PointElement, CategoryScale, LinearScale);
 const LineGraph = () => {
   const [lineChartData, setLineChartData] = useState([]);
   const decryptedUID = secureLocalStorage.getItem("uid");
-  const encryptedUID = localStorage.getItem("@secure.n.uid");
+  // const encryptedUID = localStorage.getItem("@secure.n.uid");
   useEffect(() => {
     const fetchData = async () => {
       try {

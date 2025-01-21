@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import { toast } from "react-hot-toast";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const AdminSidebar = () => {
         secureLocalStorage.removeItem("user_type");
 
         navigate("/");
-        alert("Logged Out Successfully");
+        toast.success("Logged Out Successfully");
       } else {
         console.error("Logout failed:", response.error);
       }

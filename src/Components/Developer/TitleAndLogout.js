@@ -2,10 +2,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import secureLocalStorage from "react-secure-storage";
 import axiosInstance from "../../API/axiosInstance";
+import toast from "react-hot-toast";
 
 const TitleAndLogout = (props) => {
   const navigate = useNavigate();
-  
+
   const handleLogout = async () => {
     try {
       const response = await axiosInstance.post(
@@ -18,7 +19,7 @@ const TitleAndLogout = (props) => {
         secureLocalStorage.removeItem("user_type");
 
         navigate("/");
-        alert("Logged Out Successfully");
+        toast.success("Logged Out Successfully");
       } else {
         console.error("Logout failed:", response.error);
       }
